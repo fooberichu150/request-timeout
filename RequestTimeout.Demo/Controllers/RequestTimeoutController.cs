@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,6 @@ namespace RequestTimeout.Demo.Controllers
 	{
 		private const int DELAY_10 = 10000;
 		private const int DELAY_60 = 60000;
-
 		private readonly ILogger<RequestTimeoutController> _logger;
 
 		public RequestTimeoutController(ILogger<RequestTimeoutController> logger)
@@ -37,7 +37,7 @@ namespace RequestTimeout.Demo.Controllers
 				profiler.Stop();
 				_logger.LogError(opEx, $"Operation canceled and returned after {profiler.ElapsedMilliseconds}ms");
 
-				return StatusCode(408);
+				return StatusCode((int)HttpStatusCode.RequestTimeout);
 			}
 			finally
 			{
@@ -59,9 +59,9 @@ namespace RequestTimeout.Demo.Controllers
 		[HttpGet("ridiculous")]
 		public async Task<IActionResult> RidiculousWait(CancellationToken cancellationToken)
 		{
-			await Task.Delay(DELAY_60, cancellationToken);
+			await Task.Delay(60000, cancellationToken);
 
-			return Ok("Waited 60s");
+			return Ok("Waited 10s");
 		}
 	}
 }
